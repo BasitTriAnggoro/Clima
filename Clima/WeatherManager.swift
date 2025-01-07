@@ -14,13 +14,18 @@ protocol WeatherManagerDelegate{
 }
 
 struct WeatherManager{
-    let weatherURL = "https://api.openweathermap.org/data/2.5/weather?&appid=72576e0ea0519b91bc3fc427d5e90366&units=metric&q="
+    let weatherURL = "https://api.openweathermap.org/data/2.5/weather?&appid=72576e0ea0519b91bc3fc427d5e90366&units=metric"
     
     // deklarasi variabel delegasi (delegate) untuk didelegasikan ke class lain yg berupa protocol bernama WeatherManagerDelegate
     var delegate: WeatherManagerDelegate?
     
-    func fetchWeather(with cityName: String){
-        let urlString = "\(weatherURL)\(cityName)"
+    func fetchWeather(_ cityName: String){
+        let urlString = "\(weatherURL)&q=\(cityName)"
+        performRequest(with: urlString)
+    }
+    
+    func fetchWeather(lon: String, lat: String){
+        let urlString = "\(weatherURL)\("&lat=")\(lat)\("&lon=")\(lon)"
         performRequest(with: urlString)
     }
     
@@ -34,6 +39,7 @@ struct WeatherManager{
             let task = session.dataTask(with: url){(data,response,error) in
                 if let error = error{
                     self.delegate?.didFailWithError(error)
+                    print("weathermanager failed: \(error)")
                 }
                 
                 if let safeData = data{
@@ -42,6 +48,7 @@ struct WeatherManager{
                         // delegasi diinisiasi dengan mengambil data dari weather(data cuaca yg sudah didecode)
                         // parameter dari function didUpdateWeather (dari protocol WeatherManagerDelegate) sudah terisi dan sudah tersimpan ke dalam variabel delegate (di struct WeatherManager/struct ini)
                         delegate?.didUpdateWeather(weather)
+                        print("weathermanager success: \(weather)")
                     }
                 }
             }
